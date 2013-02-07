@@ -49,7 +49,7 @@ public class MainClass {
 			resultado += " el tablero no esta correcto";
 		}
 		
-		System.out.println(resultado);
+		System.out.println(resultado + " Este es el resultado del analisis");
 
 	}
 
