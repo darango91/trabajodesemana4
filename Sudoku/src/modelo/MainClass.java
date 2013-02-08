@@ -33,11 +33,11 @@ public class MainClass {
 			e.printStackTrace();
 		}
 		tablero = new MatrizSudoku(sudoku);
-		tablero.imprimirTablero();
+		tablero.imprimirTablero(tablero.getTableroInicial());
 		
 		String resultado = "";
 		
-		if(tablero.estaCompleto()){
+		if(tablero.estaCompleto(tablero.getTableroInicial())){
 			resultado += "El tablero esta completo y";
 		}else{
 			resultado += "El tablero no esta completo y";
@@ -47,7 +47,10 @@ public class MainClass {
 		}else{
 			resultado += " el tablero no esta correcto";
 		}
+		System.out.println(resultado);
 		
+		tablero.resolver();
+		//tablero.llenarTablero();
 	}
 
 	public static void leerSudoku(String tableroSudoku, int indiceFila){

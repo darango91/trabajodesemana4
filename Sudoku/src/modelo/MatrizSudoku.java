@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class MatrizSudoku {
 
 	private char[][] tableroInicial = new char[9][9];
+	private char[][] tableroResuelto = new char[9][9];
 	private boolean esCorrecto;
 	private ArrayList<char[][]> matricesInternas = new ArrayList<char[][]>();
 	private ArrayList<char[]> filas = new ArrayList<char[]>();
@@ -16,30 +17,242 @@ public class MatrizSudoku {
 		obtenerMatricesInternas();
 		sacarEnArreglo(0);
 		sacarEnArreglo(1);
-		evaluarPosibilidadesSubMatriz(matricesInternas.get(0), 0);
 	}
 
-	public void llenarTablero(){
+	public void resolver(){
 		
-		for (int i = 0; i < tableroInicial.length; i++) {
-			for (int j = 0; j < tableroInicial.length; j++) {
-				
+		//for (int i = 0; i < matricesInternas.size(); i++) {
+			char[][] matriz = matricesInternas.get(0); //poner i en este lugar
+			
+			System.out.println("Matriz: "+(1));
+			imprimirSubMatriz(matriz);
+			
+			int[] indices = indiceDeSeleccion(0);//Indices que corresponden al inicio de conteo			
+			ArrayList[] coordenadas = new ArrayList[9];
+			
+			for (int i = 0; i < coordenadas.length; i++) {
+				System.out.println(coordenadas[i]);
+			}
+			
+			coordenadas = coordenadasOcupadas(matriz);//Primer alteración al arreglo
+			
+			for (int j = 0; j < matriz.length; j++) {
+				for (int k = 0; k < matriz.length; k++) {
+					System.out.println("Value at: "+k);
+					char[] fila = filas.get(j+indices[0]);
+					char[] columna = columnas.get(k+indices[1]);
+					
+					imprimirArreglo(fila);
+					imprimirArreglo(columna);
+					
+					String cadena = "" + matriz[j][k]; 
+					int li = Integer.parseInt(cadena) - 1;
+					
+					//imprimirArreglo(coordenadasOcupadas);
+				}
+			}
+		//}
+	}
+	
+	//Este método ingresa un null en la posicion que corresponda al numero encontrado
+	//Ej: numero encontrado=2 => se pone null en la posición 1 del arreglo.
+	public ArrayList<char[]>[]  coordenadasOcupadas(char[][] matriz){
+		
+		ArrayList[] listas = new ArrayList[9];
+		
+		for (int i1 = 0; i1 < matriz.length; i1++) {
+			for (int j1 = 0; j1 < matriz.length; j1++) {
+				if(matriz[i1][j1]!=' '){
+					String cadena = "" + matriz[i1][j1]; 
+					int l = Integer.parseInt (cadena) - 1;
+					listas[l] = null;
+				}
 			}
 		}
+		
+		return listas;
+	}
+	
+	public int[] indiceDeSeleccion(int indiceSubMatriz){
+		int[] indiceXY = new int[2];
+		int i = 0, j = 0;
+		
+		switch (indiceSubMatriz) {
+		case 0:
+			i = 0;
+			j = 0;
+			break;
+
+		case 1:
+			i = 0;
+			j = 3;
+			break;
+
+		case 2:
+			i = 0;
+			j = 6;
+			break;
+
+		case 3:
+			i = 3;
+			j = 0;
+			break;
+
+		case 4:
+			i = 3;
+			j = 3;
+			break;
+
+		case 5:
+			i = 3;
+			j = 6;
+			break;
+
+		case 6:
+			i = 6;
+			j = 0;
+			break;
+
+		case 7:
+			i = 6;
+			j = 3;
+			break;
+
+		case 8:
+			i = 6;
+			j = 6;
+			break;
+
+		default:
+			break;
+		}
+		
+		indiceXY[0] = i;
+		indiceXY[1] = j;
+		
+		return indiceXY;
+	}
+	
+	
+	//-------------------------------------------------------------
+	public void llenarTablero(){
+		
+		boolean seguir = true;
+		int cantidad = 0;
+		
+		do{
+			for (int i = 0; i < tableroInicial.length; i++) {
+				for (int j = 0; j < tableroInicial.length; j++) {
+					char car = tableroInicial[i][j];
+					if(car==' '){
+						tableroResuelto[i][j] = car;		//Envio el caracter a la matríz resuelta para guardarlo
+						char[] fila = filas.get(i);
+						char[] columna = columnas.get(j);
+						int indiceSubMatriz = indiceSubMatriz(i, j); //ya se obtuvo el valor de la sub-matriz a la que corresponde el número ubicado.
+						char[][] subMatriz = matricesInternas.get(indiceSubMatriz);
+												
+						char[] opcionesFila = valoresActuales(fila);
+						
+						char[] opcionesColumna = valoresActuales(columna);
+						
+						char[] opcionesSubMatriz = evaluarPosibilidadesSubMatriz(subMatriz);
+						
+						char[] opciones = validarCasilla(opcionesFila, opcionesColumna, opcionesSubMatriz);
+						
+						int valor = valorAPoner(opciones)+1;
+						System.out.println(valor);
+						if(valor != -1){
+							tableroResuelto[i][j] = Character.forDigit(valor, 10);
+						}
+					}else{
+						tableroResuelto[i][j] = car;
+					}
+				}
+			}
+			if(estaCompleto(tableroResuelto)){
+				System.out.println("Se resolvió!!! :D");
+				seguir = false;
+			}else{
+				seguir = true;
+				cantidad++;
+			}
+			
+		}while(seguir && cantidad < 100000);
+		
+		imprimirTablero(tableroResuelto);		
+		
+	}
+	
+	public int valorAPoner(char[] opciones){
+		
+		int cuentaVacios = 0, value = 0;
+		for (int i = 0; i < opciones.length; i++) {
+			if(opciones[i]=='x'){
+				cuentaVacios++;
+				value = i;
+			}
+		}
+		
+		if(cuentaVacios > 1) return -1;
+		else return value;
+	}
+	
+	public int indiceSubMatriz(int i, int j){
+		int indiceSubMatriz = -1;
+		if(i>=0 && i<3){
+			if(j<3){
+				indiceSubMatriz = 0;
+			}else{
+				if(j>=3 && j<6){
+					indiceSubMatriz = 3;
+				}else{
+					if(j>=6 && j<9){
+						indiceSubMatriz = 6;
+					}
+				}
+			}
+		}else{
+			if(i >= 3 && i<6){
+				if(j<3){
+					indiceSubMatriz = 2;
+				}else{
+					if(j>=3 && j<6){
+						indiceSubMatriz = 4;
+					}else{
+						if(j>=6 && j<9){
+							indiceSubMatriz = 7;
+						}
+					}
+				}						
+			}else{
+				if(i >= 6 && i<9){
+					if(j<3){
+						indiceSubMatriz = 3;
+					}else{
+						if(j>=3 && j<6){
+							indiceSubMatriz = 6;
+						}else{
+							if(j>=6 && j<9){
+								indiceSubMatriz = 8;
+							}
+						}
+					}
+				}
+			}
+		}
+		return indiceSubMatriz;
 	}
 
-	public char[] evaluarPosibilidadesSubMatriz(char[][] matrizInterna, int indiceMatrizInterna){
+	public char[] evaluarPosibilidadesSubMatriz(char[][] matrizInterna){
 		char[] arreglo = new char[9];
-		int indice = 0;
 
 		for (int i = 0; i < matrizInterna.length; i++) {
 			for (int j = 0; j < matrizInterna.length; j++) {
 				if(matrizInterna[i][j]!=' '){
-					arreglo[indice] = 'x';
-				}else{
-					arreglo[indice] = ' ';
+					String cadena = "" + matrizInterna[i][j]; 
+					int l = Integer.parseInt (cadena) - 1;
+					arreglo[l] = 'x';
 				}
-				indice++;
 			}
 		}
 
@@ -49,42 +262,34 @@ public class MatrizSudoku {
 	public char [] valoresActuales(char[] o){
 		char[] arr = new char[9];
 		for (int i = 0; i < o.length; i++) {
-			if(o[i] == ' '){
-				arr[i]=' ';
-				System.out.println("este es el num "+arr[i]+"este el indice"+i);
+			
+			if(o[i] == ' ' || o[i] == '0'){
+				//arr[l]=' ';
 			}else{
-				arr[i]='x';
+				String cadena = "" + o[i]; 
+				int l = Integer.parseInt (cadena) - 1;
+				arr[l]='x';
 			}
-			System.out.println(arr[i]);
 		}
 		return arr;
 	}
 
-	public char[] validar_casilla(char[]fila, char[] col, char[] interna){
+	public char[] validarCasilla(char[]fila, char[] col, char[] interna){
 		char [] retorno= new char[9];
 		for (int i = 0; i < 9;  i++) {
 			if(fila[i]!='x' || col[i]!='x'|| interna[i]!='x'){
 				retorno[i]='x';
-			}else {
-				boolean probar=estaCompleto();
-				if(probar==true){
-					System.out.println("el sudoku ya esta completo");
-				}else{
-					boolean otro=estaCorrecto();
-					if(otro==false){
-						System.out.println("tenemos problemas ");
-					} 
-				}	 
 			}
 		}
 		return retorno ;	 
 	}
+	//-----------------------------------------------------------------------
+	
+	public boolean estaCompleto(char[][] tablero){
 
-	public boolean estaCompleto(){
-
-		for (int i = 0; i < tableroInicial.length; i++) {
-			for (int j = 0; j < tableroInicial[i].length; j++) {
-				if(tableroInicial[i][j] == '0' || tableroInicial[i][j] == ' '){
+		for (int i = 0; i < tablero.length; i++) {
+			for (int j = 0; j < tablero[i].length; j++) {
+				if(tablero[i][j] == '0' || tablero[i][j] == ' '){
 					return false;
 				}
 			}
@@ -285,24 +490,24 @@ public class MatrizSudoku {
 		} while (cantMatrices < 9);
 	}
 
-	public void imprimirTablero(){
+	public void imprimirTablero(char[][] tablero){
 		String matriz = "";
-		for (int i = 0; i < tableroInicial.length; i++) {
-			for (int j = 0; j < tableroInicial.length; j++) {
+		for (int i = 0; i < tablero.length; i++) {
+			for (int j = 0; j < tablero.length; j++) {
 				if(j==0) matriz += "| ";
 				if(j != 8){
 					if(j==2||j==5){
-						matriz += tableroInicial[i][j]+" || ";
+						matriz += tablero[i][j]+" || ";
 					}else{
-						matriz += tableroInicial[i][j]+" | ";
+						matriz += tablero[i][j]+" | ";
 					}
 				}else{
 					if(i==2||i==5){
 						//matriz += "| 1 | 2 | 3 || 4 | 5 | 6 || 7 | 8 | 9 |"
-						matriz += tableroInicial[i][j]+" |\n";
+						matriz += tablero[i][j]+" |\n";
 						matriz += "---------------------------------------\n";
 					}else{
-						matriz += tableroInicial[i][j]+" |\n";
+						matriz += tablero[i][j]+" |\n";
 					}
 				}
 			}
@@ -335,5 +540,34 @@ public class MatrizSudoku {
 			}
 		}
 	}
+	
+	public void imprimirArreglo(char[] arreglo){
+		for (int i = 0; i < arreglo.length; i++) {
+			if((i+1)==arreglo.length){
+				System.out.print(arreglo[i]+"\n");
+			}else{
+				System.out.print(arreglo[i]);
+			}
+		}
+	}
+	
+	public void imprimirSubMatriz(char[][] subMatriz){
+		String m = "";
+		for (int i = 0; i < subMatriz.length; i++) {
+			for (int j = 0; j < subMatriz.length; j++) {
+				m += subMatriz[i][j]+" ";
+				if(j == 2) m += "\n";
+			}
+		}
+		System.out.println(m);
+	}
 
+	public char[][] getTableroInicial() {
+		return tableroInicial;
+	}
+	
+
+	public void setTableroInicial(char[][] tableroInicial) {
+		this.tableroInicial = tableroInicial;
+	}
 }
