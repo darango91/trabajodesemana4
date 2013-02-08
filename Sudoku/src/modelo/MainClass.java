@@ -26,7 +26,6 @@ public class MainClass {
 			int filas = 0;
 			while(entrada.ready()){
 				linea = entrada.readLine();
-				System.out.println(linea);
 				leerSudoku(linea,filas);
 				filas = filas+1;
 			}
@@ -49,8 +48,6 @@ public class MainClass {
 			resultado += " el tablero no esta correcto";
 		}
 		
-		System.out.println(resultado + " Este es el resultado del analisis");
-
 	}
 
 	public static void leerSudoku(String tableroSudoku, int indiceFila){

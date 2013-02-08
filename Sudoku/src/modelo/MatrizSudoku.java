@@ -22,6 +22,22 @@ public class MatrizSudoku {
 		}
 	}
 	
+	public char[] evaluarPosibilidadesSubMatriz(char[][] matrizInterna){
+		char[] arreglo = new char[9];
+		int indice = 0;
+		for (int i = 0; i < matrizInterna.length; i++) {
+			for (int j = 0; j < matrizInterna.length; j++) {
+				if(matrizInterna[i][j]!=' '){
+					
+				}
+				arreglo[indice] = matrizInterna[i][j];
+				indice++;
+			}
+		}
+				
+		return arreglo;
+	}
+	
 	public boolean estaCompleto(){
 		
 		for (int i = 0; i < tableroInicial.length; i++) {
@@ -121,8 +137,11 @@ public class MatrizSudoku {
 
 		for(int i=0;i<arreglo.length-1;i++){
 			for(int j=i+1;j<arreglo.length;j++){
-				if(arreglo[i]==arreglo[j])
-				return true;
+				if(arreglo[i]!=' '){
+					if(arreglo[i]==arreglo[j]){
+						return true;
+					}
+				}
 			}
 		}
 		return false;
